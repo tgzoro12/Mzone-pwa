@@ -23,15 +23,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo { 
-            font-size: 1.8rem; 
-            font-weight: 900;
-        }
-        .user-info { 
-            display: flex; 
-            gap: 1rem; 
-            align-items: center; 
-        }
+        .logo { font-size: 1.8rem; font-weight: 900; }
+        .user-info { display: flex; gap: 1rem; align-items: center; }
         .btn-logout {
             padding: 0.6rem 1.2rem;
             background: rgba(255,255,255,0.15);
@@ -85,9 +78,6 @@
             background: rgba(255,255,255,0.9);
             color: #2d3748;
             font-weight: 600;
-        }
-        .discount-input::placeholder {
-            color: #a0aec0;
         }
         .btn-apply {
             padding: 1rem 2rem;
@@ -212,9 +202,7 @@
             margin-bottom: 0.3rem;
             transition: all 0.3s;
         }
-        .price-amount.discounted {
-            color: #48bb78;
-        }
+        .price-amount.discounted { color: #48bb78; }
         .price-period {
             opacity: 0.8;
             margin-bottom: 1.5rem;
@@ -360,7 +348,10 @@
     </div>
 
     <script>
+        // ========== CORRECT BACKEND URL ==========
         const API_URL = 'https://mzone-backend.onrender.com';
+        // =========================================
+
         let billingPeriod = 'monthly';
         let appliedDiscount = null;
 
@@ -468,6 +459,10 @@
         }
 
         async function subscribe(planType) {
+            console.log('Subscribe clicked for:', planType);
+            console.log('Using API URL:', API_URL);
+            console.log('Token:', token);
+            
             let plan = planType + '_' + billingPeriod;
             if (appliedDiscount) plan += '_discounted';
 
@@ -482,6 +477,9 @@
                 const body = { plan };
                 if (appliedDiscount) body.discountCode = appliedDiscount.name;
 
+                console.log('Sending request to:', `${API_URL}/payment/initialize`);
+                console.log('Request body:', body);
+
                 const res = await fetch(`${API_URL}/payment/initialize`, {
                     method: 'POST',
                     headers: {
@@ -491,7 +489,9 @@
                     body: JSON.stringify(body)
                 });
 
+                console.log('Response status:', res.status);
                 const data = await res.json();
+                console.log('Response data:', data);
 
                 if (data.success && data.authorization_url) {
                     localStorage.setItem('mzone_payment_ref', data.reference);
@@ -503,7 +503,8 @@
                     btn.textContent = 'Get ' + planType.charAt(0).toUpperCase() + planType.slice(1);
                 }
             } catch (err) {
-                error.textContent = 'Connection error. Please try again.';
+                console.error('Payment error:', err);
+                error.textContent = 'Connection error: ' + err.message;
                 error.classList.add('show');
                 btn.disabled = false;
                 btn.textContent = 'Get ' + planType.charAt(0).toUpperCase() + planType.slice(1);
@@ -520,5 +521,4 @@
     </script>
     <script src="pwa-register.js"></script>
 </body>
-
 </html>
